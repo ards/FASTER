@@ -349,7 +349,10 @@ namespace FASTER.Models
             set
             {
                 if(_serverCfg != null)
+                {
                     _serverCfg.PropertyChanged -= Class_PropertyChanged;
+                }
+
                 _serverCfg                  =  value;
                 _serverCfg.PropertyChanged  += Class_PropertyChanged;
                 RaisePropertyChanged("ServerCfg");
@@ -362,7 +365,10 @@ namespace FASTER.Models
             set
             {
                 if (_armaProfile != null)
+                {
                     _armaProfile.PropertyChanged -= Class_PropertyChanged;
+                }
+
                 _armaProfile               =  value;
                 _armaProfile.PropertyChanged += Class_PropertyChanged;
                 RaisePropertyChanged("ArmaProfile");
@@ -375,7 +381,10 @@ namespace FASTER.Models
             set
             {
                 if (_basicCfg != null)
+                {
                     _basicCfg.PropertyChanged -= Class_PropertyChanged;
+                }
+
                 _basicCfg                  =  value;
                 _basicCfg.PropertyChanged += Class_PropertyChanged;
                 RaisePropertyChanged("BasicCfg");
@@ -525,7 +534,9 @@ namespace FASTER.Models
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
             if(property != "CommandLine")
+            {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CommandLine)));
+            }
         }
     }
 

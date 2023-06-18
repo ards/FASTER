@@ -21,7 +21,10 @@ namespace FASTER.Models
         public static List<ArmaMod> ParseModsFromArmaProfileFile(string filePath)
         {
             if (!File.Exists(filePath)) // This should never happen, but it pays to be safe.
+            {
                 return new List<ArmaMod>();
+            }
+
             var lines = File.ReadAllText(filePath);
 
             List<ArmaMod> extractedModlist = new();

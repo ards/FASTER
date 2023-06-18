@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 // ReSharper disable CheckNamespace
 
 namespace FASTER.Models.Tests
@@ -25,7 +26,7 @@ namespace FASTER.Models.Tests
         {
             Tuple<string, string, int> expected = new Tuple<string, string, int>("ace", "acemod", 1577907553);
             Tuple<string, string, int> res = null;
-            Assert.DoesNotThrow(() => { res = SteamMod.GetModInfo(463939057); });
+            Assert.DoesNotThrowAsync(async () => res = await SteamMod.GetModInfoAsync(463939057));
             Assert.AreEqual(expected.Item1, res.Item1, "The expected mod name was wrong");
             Assert.AreEqual(expected.Item2, res.Item2, "The expected creator name was wrong");
             Assert.GreaterOrEqual(res.Item3, expected.Item3, "The expected update time was wrong");
@@ -45,7 +46,9 @@ namespace FASTER.Models.Tests
         {
             var fullPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _armaProfileName);
             if (!File.Exists(fullPath))
+            {
                 File.WriteAllText(fullPath, _armaProfileContent);
+            }
 
             var modList = ModUtilities.ParseModsFromArmaProfileFile(fullPath);
             Assert.IsNotNull(modList);
@@ -54,7 +57,9 @@ namespace FASTER.Models.Tests
             Assert.AreEqual(ModUtilities.GetCompareString("@CBA_A3"), ModUtilities.GetCompareString(modList[0].Name));
 
             if (File.Exists(fullPath))
+            {
                 File.Delete(fullPath);
+            }
         }
 
         [Test()]
@@ -62,7 +67,9 @@ namespace FASTER.Models.Tests
         {
             var fullPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _armaProfileName);
             if (!File.Exists(fullPath))
+            {
                 File.WriteAllText(fullPath, _armaBugProfileContent);
+            }
 
             var modList = ModUtilities.ParseModsFromArmaProfileFile(fullPath);
             Assert.IsNotNull(modList);
@@ -76,7 +83,11 @@ namespace FASTER.Models.Tests
             Assert.AreEqual(ModUtilities.GetCompareString("@A3_Thermal_Improvement"), ModUtilities.GetCompareString(mod.Name));
 
             if (File.Exists(fullPath))
+            {
                 File.Delete(fullPath);
+            }
+
+
         }
     }
 }

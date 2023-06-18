@@ -40,7 +40,10 @@ namespace FASTER.Models
             if (!serverPathOnly && Properties.Settings.Default.localModFolders != null) 
             { foldersToSearch.AddRange(Properties.Settings.Default.localModFolders.Where(folder => folder != null && folder != Properties.Settings.Default.serverPath)); }
 
-            if (foldersToSearch.Count <= 0) return localMods;
+            if (foldersToSearch.Count <= 0)
+            {
+                return localMods;
+            }
 
             foreach (var localModFolder in foldersToSearch)
             {

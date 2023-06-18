@@ -45,7 +45,9 @@ namespace FASTER.Views
             }
 
             if (Properties.Settings.Default.clearSettings)
+            {
                 Properties.Settings.Default.Reset();
+            }
 
             if (Properties.Settings.Default.steamMods == null)
             {
@@ -87,7 +89,10 @@ namespace FASTER.Views
             IServerDirBox.Text = Properties.Settings.Default.serverPath;
 
             //Do not skip to mainwindow if it was FirstRun
-            if (wasFirstRun ) return;
+            if (wasFirstRun )
+            {
+                return;
+            }
 
             try
             {
@@ -132,7 +137,10 @@ namespace FASTER.Views
         {
             string path = MainWindow.Instance.SelectFolder();
 
-            if (string.IsNullOrEmpty(path)) return;
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
 
             if (Equals(sender, IModStagingDirButton))
             { IModStaging.Text = path; }
@@ -167,7 +175,10 @@ namespace FASTER.Views
             settings.steamUserName = ISteamUserBox.Text;
             settings.steamPassword = encryption.EncryptData(ISteamPassBox.Password);
             if (!string.IsNullOrEmpty(IApiKeyBox.Text))
+            {
                 Properties.Settings.Default.SteamAPIKey = IApiKeyBox.Text;
+            }
+
             settings.firstRun = false;
             settings.Save();
 

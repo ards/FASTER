@@ -93,7 +93,9 @@ namespace FASTER.Models
         {
             var originalMod = Properties.Settings.Default.armaMods.ArmaMods.FirstOrDefault(m => m.WorkshopId == WorkshopId);
             if (originalMod == null)
+            {
                 return;
+            }
 
             Author = originalMod.Author;
             Name = originalMod.Name;

@@ -16,9 +16,9 @@ namespace FASTER.Models
         {
             if (value is long size)
             {
-                double   fullSize = size;
-                string[] sizes    = {" B", "KB", "MB", "GB", "TB"};
-                var      order    = 0;
+                double fullSize = size;
+                string[] sizes = { " B", "KB", "MB", "GB", "TB" };
+                var order = 0;
                 while (fullSize >= 1024 && order < sizes.Length - 1)
                 {
                     order++;
@@ -40,7 +40,7 @@ namespace FASTER.Models
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         { return null; }
 
-    #endregion
+        #endregion IValueConverter Members
     }
 
     public class NotBooleanToVisibilityConverter : IValueConverter
@@ -51,9 +51,15 @@ namespace FASTER.Models
         {
             bool? isVisible = value as bool?;
             if (parameter != null)
+            {
                 isVisible = !isVisible;
+            }
+
             if (isVisible.HasValue && isVisible.Value)
+            {
                 return Visibility.Collapsed;
+            }
+
             return Visibility.Visible;
         }
 
@@ -62,10 +68,11 @@ namespace FASTER.Models
             throw new NotImplementedException();
         }
 
-        #endregion
+        #endregion IValueConverter Members
     }
 
-    public sealed class ValueConverterCollection : Collection<IValueConverter> { }
+    public sealed class ValueConverterCollection : Collection<IValueConverter>
+    { }
 
     public class ProfileModsFilterIsInvalidBorderColorConverter : IValueConverter
     {
@@ -75,7 +82,10 @@ namespace FASTER.Models
         {
             bool? isInvalid = value as bool?;
             if (isInvalid.HasValue && isInvalid.Value)
+            {
                 return new SolidColorBrush(Color.FromRgb(190, 17, 0));
+            }
+
             return new SolidColorBrush();
         }
 
@@ -84,7 +94,7 @@ namespace FASTER.Models
             throw new NotImplementedException();
         }
 
-        #endregion
+        #endregion IValueConverter Members
     }
 
     public class ProfileModsFilterIsInvalidBackgroundColorConverter : IValueConverter
@@ -95,7 +105,10 @@ namespace FASTER.Models
         {
             bool? isInvalid = value as bool?;
             if (isInvalid.HasValue && isInvalid.Value)
+            {
                 return new SolidColorBrush(Color.FromRgb(90, 29, 29));
+            }
+
             return new SolidColorBrush();
         }
 
@@ -104,7 +117,7 @@ namespace FASTER.Models
             throw new NotImplementedException();
         }
 
-        #endregion
+        #endregion IValueConverter Members
     }
 
     public class ProfileModsFilterIsInvalidTextConverter : IValueConverter
@@ -115,7 +128,10 @@ namespace FASTER.Models
         {
             bool? isInvalid = value as bool?;
             if (isInvalid.HasValue && isInvalid.Value)
+            {
                 return "Invalid regular expression...";
+            }
+
             return " ";
         }
 
@@ -124,6 +140,6 @@ namespace FASTER.Models
             throw new NotImplementedException();
         }
 
-        #endregion
+        #endregion IValueConverter Members
     }
 }

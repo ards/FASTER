@@ -13,10 +13,14 @@ namespace FASTER.Models
         public static void CheckSettings()
         {
             if (!Directory.Exists(Properties.Settings.Default.serverPath))
+            {
                 Properties.Settings.Default.serverPath = string.Empty;
+            }
 
             if (!Directory.Exists(Properties.Settings.Default.steamCMDPath))
+            {
                 Properties.Settings.Default.steamCMDPath = string.Empty;
+            }
         }
 
         public static string ParseFileSize(long size)
@@ -96,13 +100,18 @@ namespace FASTER.Models
         {
             var assembly = Assembly.GetExecutingAssembly().GetName().Version;
             
-            if (assembly == null) 
+            if (assembly == null)
+            {
                 return "UNKNOWN";
-            
+            }
+
             string rev = $"{(char)(assembly.Build + 96)}";
             
-            if (assembly.Build == 0) 
+            if (assembly.Build == 0)
+            {
                 rev = "ALPHA";
+            }
+
             if (assembly.Revision != 0)
             {
                 string releaseType = (assembly.Revision / 100) switch
@@ -113,7 +122,9 @@ namespace FASTER.Models
                                          _   => ""    // EMPTY RELEASE TYPE
                                      };
                 if(releaseType != "")
-                     rev += $" {releaseType}{int.Parse(assembly.Revision.ToString()[1..])}";
+                {
+                    rev += $" {releaseType}{int.Parse(assembly.Revision.ToString()[1..])}";
+                }
             }
 #if DEBUG
             rev += "-DEV";

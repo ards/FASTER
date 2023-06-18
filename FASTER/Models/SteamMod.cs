@@ -41,7 +41,10 @@ namespace FASTER.Models
         private static string GetModSize(uint workshopId)
         {
             var modFolder = Path.Combine(Properties.Settings.Default.steamCMDPath, "steamapps", "workshop", "content", "107410", workshopId.ToString());
-            if (!Directory.Exists(modFolder)) return "Unknown";
+            if (!Directory.Exists(modFolder))
+            {
+                return "Unknown";
+            }
 
             double fullSize = GetDirectorySize(modFolder);
 
@@ -80,7 +83,10 @@ namespace FASTER.Models
         {
             List<SteamMod> currentSteamMods = new();
 
-            if (Properties.Settings.Default.steamMods == null) return currentSteamMods;
+            if (Properties.Settings.Default.steamMods == null)
+            {
+                return currentSteamMods;
+            }
 
             Properties.Settings.Default.Reload();
             currentSteamMods = Properties.Settings.Default.steamMods?.SteamMods;
@@ -95,26 +101,36 @@ namespace FASTER.Models
             return uint.Parse(modID);
         }
 
-        public static Tuple<string, string, int> GetModInfo(uint modId)
+        public static async Task<Tuple<string, string, int>> GetModInfoAsync(uint modId)
         {
-            var modInfo = SteamWebApi.GetSingleFileDetails(modId);
+            var modInfo = await SteamWebApi.GetSingleFileDetailsAsync(modId);
             string author = null;
             int steamUpdateTime = 0;
             try
             {
-                if (modInfo != null) 
-                { author = SteamWebApi.GetPlayerSummaries(modInfo.SelectToken("creator").ToString())?.SelectToken("personaname")?.ToString(); }
+                if (modInfo != null)
+                {
+                    var creator = modInfo.SelectToken("creator").ToString();
+                    var response = await SteamWebApi.GetPlayerSummariesAsync(creator);
+                    author = response.SelectToken("personaname")?.ToString();
+                }
             }
             catch 
-            { author = "Unknown"; }
+            { 
+                author = "Unknown"; 
+            }
 
             try
             {
                 if (modInfo?.SelectToken("time_updated") != null) 
-                { steamUpdateTime = int.Parse(modInfo.SelectToken("time_updated").ToString()); }
+                { 
+                    steamUpdateTime = int.Parse(modInfo.SelectToken("time_updated").ToString()); 
+                }
             }
             catch 
-            { steamUpdateTime = 0; }
+            { 
+                steamUpdateTime = 0; 
+            }
 
             var modName = modInfo?.SelectToken("title").ToString();
             

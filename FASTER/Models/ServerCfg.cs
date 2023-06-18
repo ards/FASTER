@@ -462,7 +462,10 @@ namespace FASTER.Models
             {
                 persistent = value ? (short)1 : (short)0;
                 if (!value)
+                {
                     AutoInit = false;
+                }
+
                 RaisePropertyChanged("Persistent");
             }
         }
@@ -821,9 +824,16 @@ namespace FASTER.Models
 
         private void RaisePropertyChanged(string property)
         {
-            if (PropertyChanged == null) return;
+            if (PropertyChanged == null)
+            {
+                return;
+            }
+
             PropertyChanged(this, new PropertyChangedEventArgs(property));
-            if(property != "ServerCfgContent") ServerCfgContent = ProcessFile();
+            if(property != "ServerCfgContent")
+            {
+                ServerCfgContent = ProcessFile();
+            }
         }
     }
 

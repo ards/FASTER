@@ -205,9 +205,16 @@ namespace FASTER.Models
 
         private void RaisePropertyChanged(string property)
         {
-            if (PropertyChanged == null) return;
+            if (PropertyChanged == null)
+            {
+                return;
+            }
+
             PropertyChanged(this, new PropertyChangedEventArgs(property));
-            if (property != "BasicContent") BasicContent = ProcessFile();
+            if (property != "BasicContent")
+            {
+                BasicContent = ProcessFile();
+            }
         }
     }
 }

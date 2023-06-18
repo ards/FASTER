@@ -168,7 +168,11 @@ namespace FASTER.Models
 
         private void RaisePropertyChanged(string property)
         {
-            if (PropertyChanged == null) return;
+            if (PropertyChanged == null)
+            {
+                return;
+            }
+
             PropertyChanged(this, new PropertyChangedEventArgs(property));
         }
     }

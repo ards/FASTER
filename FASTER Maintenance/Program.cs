@@ -128,7 +128,10 @@ namespace FASTER_Maintenance
             {
                 var version = path.Replace(sourcePath, "").Replace("\\", "");
                 if(version.StartsWith("1.7"))
+                {
                     continue;
+                }
+
                 Console.WriteLine($"{versions.IndexOf(path)} : v{version} ({Directory.GetLastWriteTime(path):dd:MM::yyyy}");
             }
             var key = Console.ReadKey(true).KeyChar;
@@ -145,7 +148,10 @@ namespace FASTER_Maintenance
                 case '8':
                 case '9':
                     var selected = versions[int.Parse(key.ToString())];
-                    if (selected == null || selected.Contains("1.7.")) return;
+                    if (selected == null || selected.Contains("1.7."))
+                    {
+                        return;
+                    }
 
                     Console.WriteLine("\n\nDo you want to backup your data ? (Y/n)");
                     var backupKey = Console.ReadKey(true).Key;
@@ -153,9 +159,13 @@ namespace FASTER_Maintenance
                     {
                         BackupSettings();
                         if(_exitCode == 0)
+                        {
                             _exitCode = -1;
+                        }
                         else
+                        {
                             return;
+                        }
                     }
 
                     Console.WriteLine("Press any key to start the migration process...");
@@ -232,7 +242,10 @@ namespace FASTER_Maintenance
                         string text   = reader.ReadToEnd();
                         string output = Path.Combine(sourcePath, "1.7.1.0");
                         if (!Directory.Exists(output))
+                        {
                             Directory.CreateDirectory(output);
+                        }
+
                         File.WriteAllText(Path.Combine(output, "user.config"), text);
                         Console.WriteLine($"Settings were written to {output}\\user.config");
                     }

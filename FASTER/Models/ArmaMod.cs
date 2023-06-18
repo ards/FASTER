@@ -1,4 +1,5 @@
-﻿using FASTER.ViewModel;
+﻿using FASTER.Services.SteamApi;
+using FASTER.ViewModel;
 
 using System;
 using System.Collections.ObjectModel;
@@ -35,7 +36,9 @@ namespace FASTER.Models
             ArmaModCollection currentMods = new();
 
             if (Properties.Settings.Default.steamMods != null)
+            {
                 currentMods = Properties.Settings.Default.armaMods;
+            }
 
             return currentMods;
         }
@@ -52,7 +55,7 @@ namespace FASTER.Models
             {
                 currentMods.ArmaMods.Add(newMod);
                 Properties.Settings.Default.armaMods = currentMods;
-                _ = Task.Run(() => ArmaMods.FirstOrDefault(m => m.WorkshopId == newMod.WorkshopId)?.UpdateInfos());
+                _ = Task.Run(() => ArmaMods.FirstOrDefault(m => m.WorkshopId == newMod.WorkshopId)?.UpdateInfosAsync());
             }
             else
             { MainWindow.Instance.DisplayMessage("Mod Already Exists"); }
@@ -72,7 +75,10 @@ namespace FASTER.Models
                 if (item != null)
                 {
                     if(Directory.Exists(item.Path))
+                    {
                         Directory.Delete(item.Path, true);
+                    }
+
                     currentProfiles.ArmaMods.Remove(item);
                 }
                 
@@ -239,11 +245,14 @@ namespace FASTER.Models
             }
             IsLoading = true;
 
-            UpdateInfos(false);
+            await UpdateInfosAsync(false);
             
             Path = System.IO.Path.Combine(Properties.Settings.Default.modStagingDirectory, WorkshopId.ToString());
             if (!Directory.Exists(Path))
+            {
                 Directory.CreateDirectory(Path);
+            }
+
             MainWindow.Instance.NavigateToConsole();
             var res = await MainWindow.Instance.SteamUpdaterViewModel.RunModUpdater(WorkshopId, Path);
 
@@ -269,7 +278,7 @@ namespace FASTER.Models
         }
 
 
-        internal void UpdateInfos(bool checkFileSize = true)
+        internal async Task UpdateInfosAsync(bool checkFileSize = true)
         {
             IsLoading = true;
 
@@ -277,7 +286,10 @@ namespace FASTER.Models
             {
                 Status = ArmaModStatus.Local;
                 if (checkFileSize)
+                {
                     CheckModSize();
+                }
+
                 IsLoading = false;
                 return;
             }
@@ -287,7 +299,7 @@ namespace FASTER.Models
             bool success = false;
             do
             {
-                var modInfo = SteamWebApi.GetSingleFileDetails(WorkshopId);
+                var modInfo = await SteamWebApi.GetSingleFileDetailsAsync(WorkshopId);
 
                 if (modInfo == null)
                 {
@@ -305,37 +317,50 @@ namespace FASTER.Models
 
                 try
                 {
-                    var creatorDetails = SteamWebApi.GetPlayerSummaries(modDetails.creator.ToString()).ToObject<SteamApiPlayerInfo>();
+                    var resp = await SteamWebApi.GetPlayerSummariesAsync(modDetails.creator.ToString());
+                    var creatorDetails = resp?.ToObject<SteamApiPlayerInfo>();
                     Author = creatorDetails == null ? "Unknown" : creatorDetails.personaname;
                 }
                 catch
-                { Author = "Unknown"; }
+                { 
+                    Author = "Unknown"; 
+                }
 
                 SteamLastUpdated = modDetails.time_updated;
                 Name = modDetails.title;
 
                 if (SteamLastUpdated > LocalLastUpdated && Status != ArmaModStatus.NotComplete)
+                {
                     Status = ArmaModStatus.UpdateRequired;
+                }
                 else if (Status != ArmaModStatus.NotComplete)
+                {
                     Status = ArmaModStatus.UpToDate;
+                }
+
                 success = true;
             } while (failNum < 3 && !success);
 
             if (checkFileSize)
+            {
                 CheckModSize();
+            }
 
             IsLoading = false;
         }
 
-        internal bool IsOnWorkshop()
+        internal async Task<bool> IsOnWorkshopAsync()
         {
             try
             {
-                var infos = SteamWebApi.GetSingleFileDetails(WorkshopId).ToObject<SteamApiFileDetails>();
+                var fileInfo = await SteamWebApi.GetSingleFileDetailsAsync(WorkshopId);
+                var infos = fileInfo.ToObject<SteamApiFileDetails>();
                 return infos?.result == 1;
             }
             catch
-            { return false; }
+            { 
+                return false; 
+            }
         }
 
 

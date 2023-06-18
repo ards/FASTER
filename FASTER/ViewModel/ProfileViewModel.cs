@@ -65,8 +65,15 @@ namespace FASTER.ViewModel
 
         internal void LaunchHCs()
         {
-            if (!Profile.ServerCfg.HeadlessClientEnabled) return;
-            if (!VerifyBeforeLaunch()) return;
+            if (!Profile.ServerCfg.HeadlessClientEnabled)
+            {
+                return;
+            }
+
+            if (!VerifyBeforeLaunch())
+            {
+                return;
+            }
 
             //Launching... 
             DisplayMessage($"Launching Headless Clients for {Profile.Name}...");
@@ -119,7 +126,10 @@ namespace FASTER.ViewModel
 
         internal void LaunchServer()
         {
-            if (!VerifyBeforeLaunch()) return;
+            if (!VerifyBeforeLaunch())
+            {
+                return;
+            }
 
             //Launching... 
             DisplayMessage($"Launching Profile {Profile.Name}...");
@@ -146,17 +156,13 @@ namespace FASTER.ViewModel
                                            {{ "Name", Properties.Settings.Default.steamUserName }});
                 }
             }
-            #if DEBUG
-            DisplayMessage($"Launching Arma3Server with commandline : \n{commandLine}");
-            #else
+
             DisplayMessage($"Profile {Profile.Name}'s server launched !\nCommand line copied to clipboard.");
             ProcessStartInfo sStartInfo = new ProcessStartInfo(Profile.Executable, commandLine);
             Process          sProcess   = new Process { StartInfo = sStartInfo };
             sProcess.Start();
 
             LaunchHCs();
-            #endif
-            
         }
 
         /// <summary>
@@ -177,7 +183,11 @@ namespace FASTER.ViewModel
                 return false;
             }
 
-            if (File.Exists(Profile.Executable)) return true;
+            if (File.Exists(Profile.Executable))
+            {
+                return true;
+            }
+
             DisplayMessage("Arma 3 Server Executable does not exist. Please reselect correct file.");
             return false;
         }
@@ -202,8 +212,10 @@ namespace FASTER.ViewModel
             MainWindow.Instance.ContentProfileViews.Remove(MainWindow.Instance.ContentProfileViews.FirstOrDefault(p => p.Profile.Id == Profile.Id));
             var menuItem = MainWindow.Instance.IServerProfilesMenu.Items.Cast<ToggleButton>().FirstOrDefault(p => p.Name == Profile.Id);
             if(menuItem != null)
+            {
                 MainWindow.Instance.IServerProfilesMenu.Items.Remove(menuItem);
-            
+            }
+
             MainWindow.Instance.NavigateToConsole();
         }
 
@@ -239,7 +251,9 @@ namespace FASTER.ViewModel
             foreach (ProfileMod profileMod in Profile.ProfileMods.Where(m => m.ClientSideChecked || m.HeadlessChecked || m.ServerSideChecked))
             {
                 if (!links.Any(l => l.Name == $"@{Functions.SafeName(profileMod.Name)}"))
+                {
                     MissingMods++;
+                }
             }
             
 
@@ -252,8 +266,9 @@ namespace FASTER.ViewModel
             DisplayMessage($"Saved Profile {Profile.Name}");
 
             if (MissingMods > 0)
+            {
                 DisplayMessage($"{MissingMods} mods were not found in the Arma directory.\nMake sure you have deployed the correct mods");
-
+            }
         }
 
         public ObservableCollection<string> FadeOutStrings         { get; } = new ObservableCollection<string>(ProfileCfgArrays.FadeOutStrings);
@@ -275,7 +290,10 @@ namespace FASTER.ViewModel
             };
             dialog.Filters.Add(new CommonFileDialogFilter("Arma 3 Mod Preset", ".html"));
 
-            if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+            if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
 
             if (dialog.FileName == null)
             {
@@ -341,7 +359,10 @@ namespace FASTER.ViewModel
             };
             dialog.Filters.Add(new CommonFileDialogFilter("Arma 3 Server Executable", ".exe"));
 
-            if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+            if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
 
             if (dialog.FileName != null)
             { Profile.Executable = dialog.FileName; }
@@ -393,7 +414,10 @@ namespace FASTER.ViewModel
                 foreach (var keyFile in Directory.GetFiles(Path.Combine(Profile.ArmaPath, "keys")))
                 {
                     if (ignoredKeys.Any(keyFile.Contains))
+                    {
                         continue;
+                    }
+
                     try
                     {
                         await Task.Run(() => File.Delete(keyFile));
@@ -442,7 +466,10 @@ namespace FASTER.ViewModel
         
         internal void LoadMissions()
         {
-            if (!Directory.Exists(Path.Combine(Profile.ArmaPath, "mpmissions"))) return;
+            if (!Directory.Exists(Path.Combine(Profile.ArmaPath, "mpmissions")))
+            {
+                return;
+            }
 
             var missionList = new List<ProfileMission>();
             List<string> newMissions = new();
@@ -485,20 +512,44 @@ namespace FASTER.ViewModel
                 {
                     case "Server":
                         {
-                            if (from == "Client") mod.ServerSideChecked = mod.ClientSideChecked;
-                            if (from == "Headless") mod.ServerSideChecked = mod.HeadlessChecked;
+                            if (from == "Client")
+                            {
+                                mod.ServerSideChecked = mod.ClientSideChecked;
+                            }
+
+                            if (from == "Headless")
+                            {
+                                mod.ServerSideChecked = mod.HeadlessChecked;
+                            }
+
                             break;
                         }
                     case "Client":
                         {
-                            if (from == "Server") mod.ClientSideChecked = mod.ServerSideChecked;
-                            if (from == "Headless") mod.ClientSideChecked = mod.HeadlessChecked;
+                            if (from == "Server")
+                            {
+                                mod.ClientSideChecked = mod.ServerSideChecked;
+                            }
+
+                            if (from == "Headless")
+                            {
+                                mod.ClientSideChecked = mod.HeadlessChecked;
+                            }
+
                             break;
                         }
                     case "Headless":
                         {
-                            if (from == "Client") mod.HeadlessChecked = mod.ClientSideChecked;
-                            if (from == "Server") mod.HeadlessChecked = mod.ServerSideChecked;
+                            if (from == "Client")
+                            {
+                                mod.HeadlessChecked = mod.ClientSideChecked;
+                            }
+
+                            if (from == "Server")
+                            {
+                                mod.HeadlessChecked = mod.ServerSideChecked;
+                            }
+
                             break;
                         }
                 }

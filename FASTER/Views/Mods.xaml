@@ -99,7 +99,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid Visibility="{Binding Path=IsLocal, Converter={StaticResource BoolToHide}}">
-                                <Button Height="25" Width="25" Padding="0" Click="UpdateMod" Content="{iconPacks:Material Kind=Update}"  Style="{StaticResource MahApps.Styles.Button.MetroSquare.Accent}"
+                                <Button Height="25" Width="25" Padding="0" Click="UpdateModAsync" Content="{iconPacks:Material Kind=Update}"  Style="{StaticResource MahApps.Styles.Button.MetroSquare.Accent}"
                                         Visibility="{Binding Path=IsLoading, Converter={StaticResource BoolToHide}}"
                                         BorderThickness="0" HorizontalAlignment="Center"/>
                                 <fa:ImageAwesome Height="20" Width="20" Margin="2.5" Icon="CircleOutlineNotch" Spin="{Binding Path=IsLoading}" Foreground="White" Visibility="{Binding Path=IsLoading, Converter={StaticResource BoolToVis}}" />

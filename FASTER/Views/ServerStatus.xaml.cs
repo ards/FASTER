@@ -121,13 +121,21 @@ namespace FASTER.Views
         #region Process Buttons
         private void PlayPause_Click(object sender, RoutedEventArgs e)
         {
-            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view)) return;
+            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view))
+            {
+                return;
+            }
+
             view.StartStop();
         }
 
         private void KillProcess_Click(object sender, RoutedEventArgs e)
         {
-            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view)) return;
+            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view))
+            {
+                return;
+            }
+
             view.IsReading = false;
             view.proc.Kill();
             RefreshServers();
@@ -137,7 +145,11 @@ namespace FASTER.Views
         #region Console Viewer
         private void ReadOutput_Click(object sender, RoutedEventArgs e)
         {
-            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view)) return;
+            if (!(((FrameworkElement) e.Source).DataContext is ProcessSpy view))
+            {
+                return;
+            }
+
             var s = view.GetOutput();
             IConsoleViewer.Title = $"Process {view.ProcessId}";
             IConsoleViewer.IsOpen = true;
@@ -361,10 +373,15 @@ namespace FASTER.Views
                 SetAxisLimits(now);
  
                 //lets only use the last 20 values
-                if (MemChartValues.Count > 20) 
+                if (MemChartValues.Count > 20)
+                {
                     MemChartValues.RemoveAt(0);
-                if (CPUChartValues.Count > 20) 
+                }
+
+                if (CPUChartValues.Count > 20)
+                {
                     CPUChartValues.RemoveAt(0);
+                }
 
                 //Wait 1sec before next measurement
                 Thread.Sleep(1000);
@@ -383,8 +400,10 @@ namespace FASTER.Views
         public void StartStop()
         {
             IsReading = !IsReading;
-            if (IsReading) 
+            if (IsReading)
+            {
                 Task.Factory.StartNew(ReadCPU, token);
+            }
         }
 
         #region INotifyPropertyChanged implementation
@@ -441,12 +460,16 @@ namespace FASTER.Views
         }
         public void StartStop(bool? launch = null)
         {
-            if (launch != null) 
+            if (launch != null)
+            {
                 IsReading = (bool) launch;
+            }
             else
             { IsReading = !IsReading; }
             if (IsReading)
+            {
                 Task.Factory.StartNew(TempLoop, TaskCreationOptions.LongRunning);
+            }
         }
 
         private void TempLoop()
@@ -458,12 +481,23 @@ namespace FASTER.Views
                 {
                     var obj = searcher.Get().OfType<ManagementObject>().FirstOrDefault();
                     if (obj == null)
+                    {
                         return;
+                    }
+
                     var temperature = float.Parse(obj["CurrentTemperature"].ToString());
                     // Convert the value to celsius degrees
                     temperature = (temperature - (float)2732.0) / (float)10.0;
-                    if (temperature >= AxisYMax) AxisYMax = temperature + 1;
-                    if (temperature <= AxisYMin) AxisYMin = temperature - 1;
+                    if (temperature >= AxisYMax)
+                    {
+                        AxisYMax = temperature + 1;
+                    }
+
+                    if (temperature <= AxisYMin)
+                    {
+                        AxisYMin = temperature - 1;
+                    }
+
                     try { ChartValues.Add(new MeasureModel { DateTime = now, Value = temperature }); }
                     catch
                     {

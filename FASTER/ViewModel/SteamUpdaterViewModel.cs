@@ -193,15 +193,19 @@ namespace FASTER.ViewModel
             Parameters.Output += "\nChecking Executables...";
             //Either downloading depot 233782 fow Windows from branch public or 233784 for windows in branch profiling
             if (Parameters.UsingPerfBinaries)
+            {
                 depotsDownload.Add((
                     depotsIDs.FirstOrDefault(d => d.Value == "Arma 3 Server Profiling - WINDOWS Depot").Key,
                     "profiling",
                     "CautionSpecialProfilingAndTestingBranchArma3"));
+            }
             else
+            {
                 depotsDownload.Add((
                     depotsIDs.FirstOrDefault(d => d.Value == "Arma 3 Alpha Dedicated Server binary Windows (internal)").Key,
                     "public",
                     null));
+            }
 
             //Downloading mods
             if (Parameters.UsingGMDlc)
@@ -248,8 +252,10 @@ namespace FASTER.ViewModel
         private async Task<IReadOnlyList<Depot>> GetAppDepots(uint appId)
         {
             if (!await SteamLogin())
+            {
                 return null;
-            
+            }
+
             return await SteamContentClient.GetDepotsAsync(appId);
         }
 
@@ -265,8 +271,10 @@ namespace FASTER.ViewModel
         {
             string path = MainWindow.Instance.SelectFolder(Parameters.ModStagingDirectory);
 
-            if (path == null) 
+            if (path == null)
+            {
                 return;
+            }
 
             Parameters.ModStagingDirectory = path;
         }
@@ -276,7 +284,9 @@ namespace FASTER.ViewModel
             string path = MainWindow.Instance.SelectFolder(Parameters.InstallDirectory);
 
             if (path == null)
+            {
                 return;
+            }
 
             Parameters.InstallDirectory = path;
         }
@@ -284,14 +294,21 @@ namespace FASTER.ViewModel
         internal async Task<int> RunServerUpdater(string path, uint appId, List<(uint id, string branch, string pass)> depots)
         {
             if (string.IsNullOrWhiteSpace(path))
+            {
                 return UpdateState.Cancelled;
+            }
 
             if (!Directory.Exists(path))
+            {
                 Directory.CreateDirectory(path);
+            }
+
             tokenSource = new CancellationTokenSource();
 
             if (!await SteamLogin())
+            {
                 return UpdateState.LoginFailed;
+            }
 
             var _OS = SteamClient?.GetSteamOs().Identifier;
             Stopwatch sw = Stopwatch.StartNew();
@@ -334,7 +351,9 @@ namespace FASTER.ViewModel
                     SteamClient = null;
                 }
                 if (!await SteamLogin())
+                {
                     return UpdateState.LoginFailed;
+                }
             }
             catch(Exception)
             {
@@ -420,7 +439,9 @@ namespace FASTER.ViewModel
                 _ = Task.Factory.StartNew(() =>
                 {
                     if (!Directory.Exists(mod.Path))
+                    {
                         Directory.CreateDirectory(mod.Path);
+                    }
 
                     if (tokenSource.Token.IsCancellationRequested)
                     {
@@ -507,7 +528,9 @@ namespace FASTER.ViewModel
             var path = Path.Combine(Path.GetDirectoryName(ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath) ?? string.Empty, "sentries");
             SteamAuthenticationFilesProvider sentryFileProvider = new DirectorySteamAuthenticationFilesProvider(path);
             if (_steamCredentials == null || _steamCredentials.IsAnonymous)
+            {
                 _steamCredentials = new SteamCredentials(Parameters.Username, Encryption.Instance.DecryptData(Parameters.Password), Parameters.ApiKey);
+            }
 
             SteamClient ??= new SteamClient(_steamCredentials, new AuthCodeProvider(), sentryFileProvider);
 
@@ -560,7 +583,9 @@ namespace FASTER.ViewModel
                 var relativeLocalPath = Path.GetRelativePath(targetDir, localFilePath);
 
                 if (manifest.Files.Any(x => string.Equals(x.FileName, relativeLocalPath, StringComparison.InvariantCultureIgnoreCase)))
+                {
                     continue;
+                }
 
                 Console.WriteLine($"Deleting local file {relativeLocalPath}");
                 File.Delete(localFilePath);
@@ -582,8 +607,10 @@ namespace FASTER.ViewModel
             downloadHandler.DownloadComplete      += (_, _) => Parameters.Output += "\nDownload completed";
 
             if (tokenSource.IsCancellationRequested)
+            {
                 tokenSource = new CancellationTokenSource();
-            
+            }
+
             Task downloadTask = downloadHandler.DownloadToFolderAsync(targetDir, tokenSource.Token);
             
 
@@ -600,7 +627,10 @@ namespace FASTER.ViewModel
                 await Task.WhenAny(delayTask, downloadTask);
 
                 if (tokenSource.Token.IsCancellationRequested)
+                {
                     Parameters.Output += "\nTask cancellation requested";
+                }
+
                 Parameters.Output += $"\nProgress {downloadHandler.TotalProgress * 100:00.00}%";
                 Parameters.Progress = downloadHandler.TotalProgress * 100;
             }
@@ -634,10 +664,14 @@ namespace FASTER.ViewModel
         private async Task DownloadForMultiple(IDownloadHandler downloadHandler, string targetDir)
         {
             if (targetDir == null)
+            {
                 return;
-            
+            }
+
             if (!Directory.Exists(targetDir))
+            {
                 Directory.CreateDirectory(targetDir);
+            }
 
             tokenSource.Token.ThrowIfCancellationRequested();
             ulong downloadedSize = 0;
@@ -665,7 +699,9 @@ namespace FASTER.ViewModel
                 await Task.WhenAny(delayTask, downloadTask);
 
                 if (tokenSource.IsCancellationRequested)
+                {
                     Parameters.Output += "\n    Task cancellation requested";
+                }
             }
 
             if (downloadTask.IsCanceled)
@@ -698,7 +734,11 @@ namespace FASTER.ViewModel
 
         private void RaisePropertyChanged(string property)
         {
-            if (PropertyChanged == null) return;
+            if (PropertyChanged == null)
+            {
+                return;
+            }
+
             PropertyChanged(this, new PropertyChangedEventArgs(property));
         }
     }

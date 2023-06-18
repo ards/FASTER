@@ -1,11 +1,10 @@
 ﻿using BytexDigital.Steam.Core;
-
 using Newtonsoft.Json.Linq;
-
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FASTER.Models
@@ -17,73 +16,90 @@ namespace FASTER.Models
 
 
         // Get mod info for single mod
-        public static JObject GetSingleFileDetails(uint modId)
+        public static async Task<JObject> GetSingleFileDetailsAsync(uint modId)
         {
             try
             {
-                var response = ApiCall("https://api.steampowered.com/IPublishedFileService/GetDetails/v1?key=" + GetApiKey() + V3 + modId);
+                var response = await ApiCallAsync("https://api.steampowered.com/IPublishedFileService/GetDetails/v1?key=" + GetApiKey() + V3 + modId);
                 return (JObject)response?.SelectToken("response.publishedfiledetails[0]");
             }
-            catch
-            { return null; }
+            catch (Exception ex)
+            {
+                if (Environment.UserInteractive)
+                {
+                    MessageBox.Show("Cannot reach Steam API \n\nCheck https://steamstat.us/", $"Steam API Error:'{ex.Message}'", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    Console.WriteLine($"Cannot reach Steam API \n\nCheck https://steamstat.us/! Steam API Error:'{ex.Message}'");
+                }
+                return null;
+            }
         }
 
 
         // Gets user info
-        public static JObject GetPlayerSummaries(string playerId)
+        public static async Task<JObject> GetPlayerSummariesAsync(string playerId)
         {
             try
             {
-                var response = ApiCall("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1?key=" + GetApiKey() + V2 + playerId);
+                var response = await ApiCallAsync("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1?key=" + GetApiKey() + V2 + playerId);
                 return (JObject)response?.SelectToken("response.players.player[0]");
             }
-            catch
-            { return null; }
+            catch (Exception ex)
+            {
+                if (Environment.UserInteractive)
+                {
+                    MessageBox.Show("Cannot reach Steam API \n\nCheck https://steamstat.us/", $"Steam API Error:'{ex.Message}'", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    Console.WriteLine($"Cannot reach Steam API \n\nCheck https://steamstat.us/! Steam API Error:'{ex.Message}'");
+                }
+                return null;
+            }
         }
 
 
-        // Calls to Steam API Endpoint and returns the result as JSON Object
-        private static JObject ApiCall(string uri)
+        /// <summary>
+        /// Calls to Steam API Endpoint and returns the result as JSON Object.
+        /// </summary>
+        /// <param name="uri">Url</param>
+        /// <returns>Json object</returns>
+        /// <exception cref="ArgumentException"></exception>
+        private static async Task<JObject> ApiCallAsync(string uri)
         {
-            // Create a request for the URL. 
-            HttpClient client = new();
-            client.Timeout = TimeSpan.FromSeconds(5);
-
-            // Get the response.
-            HttpResponseMessage response = null;
+            if (string.IsNullOrEmpty(uri))
+            {
+                throw new ArgumentException($"'{nameof(uri)}' cannot be null or empty.", nameof(uri));
+            }
 
             try
-            { response = client.GetAsync(uri).Result; }
-            catch (WebException e)
             {
-                try
-                {
-                    MainWindow.Instance.Dispatcher?.InvokeAsync(() =>
-                    {
-                        MainWindow.Instance.DisplayMessage("Cannot reach Steam API \n\nCheck https://steamstat.us/ \n\nPlease check the Windows Event Logs for more informations");
-                    });
+                using HttpClient client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(100);
 
-                    // Create an EventLog instance and assign its source.
-                    using EventLog eventLog = new EventLog("Application")
-                    { Source = "FASTER" };
-                    eventLog.WriteEntry($"Could not reach Steam API : \n[WebException] {e.Message}\n\n{e.StackTrace}", EventLogEntryType.Error);
-                }
-                catch (Exception) //In case it was called before Initialized in SteamMods_Initialized() and could not connect to SteamAPI
+                HttpResponseMessage response = await client.GetAsync(uri);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    if (Environment.UserInteractive)
-                        MessageBox.Show("Cannot reach Steam API \n\nCheck https://steamstat.us/", "Steam API Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    else
-                        Console.WriteLine("Cannot reach Steam API \n\nCheck https://steamstat.us/");
+                    var content = await response.Content.ReadAsStringAsync();
+                    return JObject.Parse(content);
+                }
+                else if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    await Task.Delay(5000);
+                    return await ApiCallAsync(uri); // Retry the API call after the delay
+                }
+                else
+                {
+                    return null;
                 }
             }
-            // Display the status.
-            Console.WriteLine((response)?.StatusCode);
-
-            return response == null
-                       ? null
-                       : JObject.Parse(response.Content.ReadAsStringAsync().Result);
-
-            // Return the response
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while making the API call.", ex);
+            }
         }
 
         private static string GetApiKey()
@@ -118,28 +134,5 @@ namespace FASTER.Models
 
             return input;
         }
-    }
-
-
-    internal class SteamApiFileDetails
-    {
-        public uint result { get; set; }
-        public ulong publishedfileid { get; set; }
-        public ulong creator { get; set; }
-        public uint creator_appid { get; set; }
-        public uint consumer_appid { get; set; }
-        public string filename { get; set; }
-        public ulong file_size { get; set; }
-        public string title { get; set; }
-        public string file_description { get; set; }
-        public ulong time_created { get; set; }
-        public ulong time_updated { get; set; }
-    }
-
-    internal class SteamApiPlayerInfo
-    {
-        public ulong steamid { get; set; }
-        public string personaname { get; set; }
-        public string profileurl { get; set; }
     }
 }

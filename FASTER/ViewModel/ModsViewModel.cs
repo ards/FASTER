@@ -40,7 +40,9 @@ namespace FASTER.ViewModel
             var modID = await DialogCoordinator.ShowInputAsync(this, "Add Steam Mod", "Please enter the mod ID or mod URL");
 
             if (string.IsNullOrEmpty(modID))
+            {
                 return;
+            }
 
             Analytics.TrackEvent("Mods - Clicked AddSteamMod", new Dictionary<string, string>
             {
@@ -56,7 +58,9 @@ namespace FASTER.ViewModel
             }
 
             if (!uint.TryParse(modID, out uint modIDOut))
+            {
                 return;
+            }
 
             var mod = new ArmaMod
             {
@@ -73,10 +77,14 @@ namespace FASTER.ViewModel
             var localPath = MainWindow.Instance.SelectFolder(Properties.Settings.Default.modStagingDirectory);
 
             if (string.IsNullOrEmpty(localPath))
+            {
                 return;
+            }
 
             if (!Directory.Exists(localPath))
+            {
                 return;
+            }
 
             var oldPaths = new List<string>();
             if (!Path.GetFileName(localPath).StartsWith("@") && Directory.GetDirectories(localPath).Where((file) => Path.GetFileName(file).StartsWith("@")).ToList().Count > 0)
@@ -131,7 +139,9 @@ namespace FASTER.ViewModel
         internal void DeleteMod(ArmaMod mod)
         {
             if (mod == null)
+            {
                 return;
+            }
 
             ModsCollection.DeleteSteamMod(mod.WorkshopId);
         }
@@ -146,7 +156,9 @@ namespace FASTER.ViewModel
         public void OpenModPage(ArmaMod mod)
         {
             if (mod == null)
+            {
                 return;
+            }
 
             var url = "https://steamcommunity.com/workshop/filedetails/?id=" + mod.WorkshopId;
 
@@ -168,7 +180,10 @@ namespace FASTER.ViewModel
         {
             string modsFile = Functions.SelectFile("Arma 3 Launcher File|*.html");
 
-            if (string.IsNullOrEmpty(modsFile)) return;
+            if (string.IsNullOrEmpty(modsFile))
+            {
+                return;
+            }
 
             var extractedModList = ModUtilities.ParseModsFromArmaProfileFile(modsFile);
 
@@ -176,7 +191,9 @@ namespace FASTER.ViewModel
             {
                 var mod = ModsCollection.ArmaMods.FirstOrDefault(m => m.WorkshopId == extractedMod.WorkshopId || ModUtilities.GetCompareString(extractedMod.Name) == ModUtilities.GetCompareString(m.Name));
                 if (mod != null)
+                {
                     continue;
+                }
 
                 if (extractedMod.IsLocal)
                 {
@@ -184,8 +201,10 @@ namespace FASTER.ViewModel
                     continue;
                 }
 
-                if(!await Task.Run(() => extractedMod.IsOnWorkshop()))
+                if (!await Task.Run(() => extractedMod.IsOnWorkshopAsync()))
+                {
                     continue;
+                }
 
                 ModsCollection.AddSteamMod(extractedMod);
             }
@@ -207,10 +226,23 @@ namespace FASTER.ViewModel
 
             Process.Start(startInfo);
         }
-        public void CheckForUpdates()
+        public async Task CheckForUpdates()
         {
-            foreach (ArmaMod mod in ModsCollection.ArmaMods)
-            { Task.Run(() => mod.UpdateInfos()); }
+            //foreach (var mod in ModsCollection.ArmaMods)
+            //{
+            //    await Task.Run(async () =>
+            //    {
+            //        await mod.UpdateInfosAsync();
+            //    });
+            //}
+
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(ModsCollection.ArmaMods, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async mod =>
+                {
+                    await mod.UpdateInfosAsync();
+                });
+            });
         }
 
         public async Task UpdateAll()
@@ -222,8 +254,10 @@ namespace FASTER.ViewModel
 
             MainWindow.Instance.NavigateToConsole();
             var ans = await MainWindow.Instance.SteamUpdaterViewModel.RunModsUpdater(ModsCollection.ArmaMods);
-            if(ans == UpdateState.LoginFailed) 
+            if(ans == UpdateState.LoginFailed)
+            {
                 DisplayMessage("Steam Login Failed");
+            }
         }
     }
 }

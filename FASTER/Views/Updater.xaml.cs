@@ -40,7 +40,9 @@ namespace FASTER.Views
         private void PasswordBox_OnPasswordChanged(object sender, RoutedEventArgs e)
         {
             if(sender is PasswordBox {IsFocused: true} box)
+            {
                 ((SteamUpdaterViewModel) DataContext)?.PasswordChanged(box.Password);
+            }
         }
 
         private void Updater_OnLoaded(object sender, RoutedEventArgs e)

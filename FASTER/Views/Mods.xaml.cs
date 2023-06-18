@@ -1,6 +1,5 @@
 ﻿using FASTER.Models;
 using FASTER.ViewModel;
-
 using System;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
@@ -35,11 +34,13 @@ namespace FASTER.Views
             ((ModsViewModel) DataContext)?.UnloadData();
         }
 
-        private async void UpdateMod(object sender, RoutedEventArgs e)
+        private async void UpdateModAsync(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement) sender).DataContext is not ArmaMod mod)
+            if (((FrameworkElement)sender).DataContext is not ArmaMod mod)
+            {
                 return;
-            
+            }
+
             await mod.UpdateModAsync();
         }
 
@@ -81,9 +82,9 @@ namespace FASTER.Views
             await ((ModsViewModel)DataContext)?.OpenLauncherFile();
         }
 
-        private void CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
-            ((ModsViewModel) DataContext)?.CheckForUpdates();
+            await ((ModsViewModel) DataContext)?.CheckForUpdates();
         }
 
         private async void UpdateAll_Click(object sender, RoutedEventArgs e)

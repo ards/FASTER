@@ -43,7 +43,10 @@ namespace FASTER.ViewModel
             foreach (var mod in Settings.Default.armaMods.ArmaMods)
             {
                 if (Deployment.DeployMods.Any(m => m.WorkshopId == mod.WorkshopId))
+                {
                     continue;
+                }
+
                 Deployment.DeployMods.Add(new DeploymentMod(mod));
                 Settings.Default.Save();
             }
@@ -90,7 +93,9 @@ namespace FASTER.ViewModel
                 //UNLINK MOD
                 var links = Directory.EnumerateDirectories(Deployment.InstallPath).Select(d => new DirectoryInfo(d)).Where(d => d.Attributes.HasFlag(FileAttributes.ReparsePoint));
                 if (links.Any(l => l.Name == $"@{Functions.SafeName(mod.Name)}"))
+                {
                     DeleteLink(linkPath);
+                }
             }
 
             Settings.Default.Deployments = Deployment;
@@ -137,7 +142,9 @@ namespace FASTER.ViewModel
             string path = MainWindow.Instance.SelectFolder(Deployment.InstallPath);
 
             if (path == null)
+            {
                 return;
+            }
 
             Deployment.InstallPath = path;
 
@@ -179,7 +186,9 @@ namespace FASTER.ViewModel
         public void OpenModPage(DeploymentMod mod)
         {
             if (mod == null)
+            {
                 return;
+            }
 
             var url = "https://steamcommunity.com/workshop/filedetails/?id=" + mod.WorkshopId;
 
@@ -207,7 +216,9 @@ namespace FASTER.ViewModel
             try
             {
                 if(Directory.Exists(linkPath))
+                {
                     Directory.Delete(linkPath, true);
+                }
 
                 Directory.CreateSymbolicLink(linkPath ?? throw new ArgumentNullException(nameof(linkPath)), mod.Path);
             }
@@ -224,7 +235,9 @@ namespace FASTER.ViewModel
             try
             {
                 if (Directory.Exists(linkPath))
+                {
                     Directory.Delete(linkPath, true);
+                }
             }
             catch (Exception ex)
             { DisplayMessage("An exception occurred: \n\n" + ex.Message); }

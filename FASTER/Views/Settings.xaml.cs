@@ -154,8 +154,11 @@ namespace FASTER.Views
 
         private void ISaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(IAPIKeyBox.Text)) 
+            if (!string.IsNullOrEmpty(IAPIKeyBox.Text))
+            {
                 Properties.Settings.Default.SteamAPIKey = IAPIKeyBox.Text;
+            }
+
             Properties.Settings.Default.checkForAppUpdates = IAppUpdatesOnLaunch.IsChecked ?? true;
             Properties.Settings.Default.checkForModUpdates = IModUpdatesOnLaunch.IsChecked ?? true;
             Properties.Settings.Default.Save();
@@ -180,7 +183,10 @@ namespace FASTER.Views
         private void Colors_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if(e.AddedItems[0] is not Theme theme)
+            {
                 return;
+            }
+
             ThemeManager.Current.ThemeSyncMode = ThemeSyncMode.SyncAll;
             ThemeManager.Current.ChangeTheme(Application.Current, theme);
 
@@ -191,7 +197,9 @@ namespace FASTER.Views
         private void Fonts_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (e.AddedItems[0] is not FontFamily font)
+            {
                 return;
+            }
 
             MetroWindow.FontFamily = font;
 
@@ -203,12 +211,16 @@ namespace FASTER.Views
         {
 
             if ((sender is Slider slider) && !slider.IsLoaded)
+            {
                 return;
+            }
 
             Properties.Settings.Default.CliWorkers = Convert.ToUInt16(e.NewValue);
             NumericUpDown.Value = e.NewValue;
             if (MainWindow.Instance.SteamUpdaterViewModel.SteamContentClient != null)
+            {
                 MainWindow.Instance.SteamUpdaterViewModel.SteamContentClient = new SteamContentClient(MainWindow.Instance.SteamUpdaterViewModel.SteamClient, Properties.Settings.Default.CliWorkers);
+            }
         }
     }
 }
